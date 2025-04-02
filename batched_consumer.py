@@ -6,7 +6,7 @@ import time
 import csv
 print("about to start", flush=True)
 driver = mofka.MofkaDriver("mofka.json")
-batch_size = AdaptiveBatchSize
+batch_size = 1024
 thread_pool = ThreadPool(0)
 # create a topic
 topic_name = "interception"
@@ -32,11 +32,11 @@ while True:
     f = consumer.pull()
     event = f.wait()
     t2 = time.time()
+    pulls.append(t2 - t1)
     e = json.loads(event.metadata)
 
 
-    events.append(e)
-    pulls.append(t2 - t1)
+    # events.append(e)
     # print("h: ", e.keys(),flush=True)
     
     # break
@@ -49,8 +49,8 @@ while True:
         
     if count == threshold:
         print("About to write", flush=True)
-        with open("data.json", 'w') as f:
-            json.dump(events, f, indent=4)
+        # with open("data.json", 'w') as f:
+        #     json.dump(events, f, indent=4)
         with open("pulls.csv", "w", newline="") as f:
             writer = csv.writer(f)
             writer.writerow(pulls)
