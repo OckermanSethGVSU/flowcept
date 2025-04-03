@@ -26,15 +26,12 @@ csv_files = [file for file in os.listdir() if file.endswith('.csv')]
 threshold = len(csv_files)
 print("about to start with breakpoint ",threshold, flush=True)
 while True:
-    data = []
-    metadata = []
     t1 = time.time()
     f = consumer.pull()
     event = f.wait()
     t2 = time.time()
     pulls.append(t2 - t1)
     e = json.loads(event.metadata)
-
 
     # events.append(e)
     # print("h: ", e.keys(),flush=True)
@@ -48,12 +45,12 @@ while True:
                 count += 1
         
     if count == threshold:
-        print("About to write", flush=True)
-        # with open("data.json", 'w') as f:
-        #     json.dump(events, f, indent=4)
-        with open("pulls.csv", "w", newline="") as f:
-            writer = csv.writer(f)
-            writer.writerow(pulls)
+        # print("About to write", flush=True)
+        # # with open("data.json", 'w') as f:
+        # #     json.dump(events, f, indent=4)
+        # with open("pulls.csv", "w", newline="") as f:
+        #     writer = csv.writer(f)
+        #     writer.writerow(pulls)
         print("Done :) ", flush=True)
         break
 

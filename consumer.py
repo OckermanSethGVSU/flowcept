@@ -4,6 +4,8 @@ import json
 import os
 import time
 import csv
+
+
 print("about to start", flush=True)
 driver = mofka.MofkaDriver("mofka.json")
 batch_size = AdaptiveBatchSize

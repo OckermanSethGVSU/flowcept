@@ -86,10 +86,10 @@ def get_wiki_text_dataset(train_data_path, val_data_path, test_data_path, dask_m
 
     try:
         if torch.cuda.is_available():
-            if dask_map_gpus:
-                gpu_id = dask_map_gpus_to_worker()
-            else:
-                gpu_id = 0
+            # if dask_map_gpus:
+            #     gpu_id = dask_map_gpus_to_worker()
+            # else:
+            gpu_id = 0
             device = torch.device(f"cuda:{gpu_id}")
             torch.cuda.set_device(device)
 

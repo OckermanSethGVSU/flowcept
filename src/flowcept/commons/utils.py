@@ -37,18 +37,15 @@ def datetime_to_str(dt: datetime) -> str:
     return dt.strftime(format_string)
 
 
-def get_utc_minutes_ago(minutes_ago=1, return_float=False):
-    """Get UTC minutes ago."""
+def get_utc_minutes_ago(minutes_ago=1):
+    """Get UTC minutes."""
     now = datetime.now(timezone.utc)
     rounded = now - timedelta(
         minutes=now.minute % minutes_ago + minutes_ago,
         seconds=now.second,
         microseconds=now.microsecond,
     )
-    if return_float:
-        return rounded.timestamp()
-    else:
-        return rounded
+    return rounded.timestamp()
 
 
 def perf_log(func_name, t0: float, logger=None):

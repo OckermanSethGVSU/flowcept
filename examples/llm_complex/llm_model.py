@@ -108,6 +108,8 @@ def train_epoch(ntokens, model, train_data, criterion, optimizer, bptt=35, epoch
                              epochs_loop=epochs_loop,
                              items_length=math.ceil((train_data.size(0) - 1) / bptt),
                              capture_enabled=with_flowcept)
+    # total = math.ceil((train_data.size(0) - 1) / bptt)
+    # count = 0
     for batch, i in loop:
         data, targets = get_batch(
             train_data, i, bptt
@@ -122,6 +124,8 @@ def train_epoch(ntokens, model, train_data, criterion, optimizer, bptt=35, epoch
         loss_item = loss.item()
         total_loss += loss_item  # Accumulate the total loss
         loop.end_iter({"loss": loss_item})
+        # print(f"{count}/{total}", flush=True)
+        # count += 1
     return total_loss / (batch + 1)  # Return the average loss per mini-batch
 
 
@@ -129,6 +133,7 @@ def evaluate(ntokens, model, data_source, criterion, bptt=35, epochs_loop=None, 
     model.eval()  # Set the model to evaluation mode
     total_loss = 0.0  # Initialize the total loss to 0
 
+   
     # Use torch.no_grad() to disable gradient calculation during evaluation
     with torch.no_grad():
         loop = FlowceptBatchLoop(items=enumerate(range(0, data_source.size(0) - 1, bptt)),

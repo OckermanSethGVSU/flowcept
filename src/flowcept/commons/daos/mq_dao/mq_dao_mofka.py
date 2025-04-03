@@ -26,14 +26,14 @@ class MQDaoMofka(MQDao):
             print("Starting producer")
             self.producer = MQDaoMofka._topic.producer(
                 "p" + MQ_CHANNEL,
-                batch_size=mofka.AdaptiveBatchSize,
+                batch_size=999999,
                 thread_pool=mofka.ThreadPool(1),
                 ordering=mofka.Ordering.Strict,
             )
 
     def subscribe(self):
         """Subscribe to Mofka topic."""
-        batch_size = AdaptiveBatchSize
+        batch_size = 999999
         thread_pool = ThreadPool(0)
         self.consumer = MQDaoMofka._topic.consumer(
             name=MQ_CHANNEL + str(uuid.uuid4()), thread_pool=thread_pool, batch_size=batch_size

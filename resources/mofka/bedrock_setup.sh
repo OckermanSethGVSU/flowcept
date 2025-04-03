@@ -1,7 +1,9 @@
 export HG_LOG_LEVEL=error
 export FI_LOG_LEVEL=Trace
 rm -rf mofka.json
+rm -fr script.pid
 
+echo $$ > script.pid
 
 bedrock cxi -c resources/mofka/mofka_config.json &
 

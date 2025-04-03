@@ -28,36 +28,7 @@ from flowcept.flowceptor.telemetry_capture import TelemetryCapture
 class BaseInterceptor(object):
     """Base interceptor class."""
 
-    # KINDS_TO_NOT_EXPLICITLY_CONTROL = {"dask"}
-
-    @staticmethod
-    def build(kind: str) -> "BaseInterceptor":
-        """Build the Interceptor."""
-        # TODO consider making singleton for all, just for standardization
-        if kind == "mlflow":
-            from flowcept.flowceptor.adapters.mlflow.mlflow_interceptor import MLFlowInterceptor
-
-            return MLFlowInterceptor()
-        elif kind == "tensorboard":
-            from flowcept.flowceptor.adapters.tensorboard.tensorboard_interceptor import TensorboardInterceptor
-
-            return TensorboardInterceptor()
-        elif kind == "dask_worker":
-            from flowcept.flowceptor.adapters.dask.dask_interceptor import DaskWorkerInterceptor
-
-            return DaskWorkerInterceptor()
-        elif kind in "dask":
-            # This is dask's client interceptor. We essentially use it to store the dask workflow.
-            # That's why we don't need another special interceptor and we can reuse the instrumentation one.
-            from flowcept.flowceptor.adapters.instrumentation_interceptor import InstrumentationInterceptor
-
-            return InstrumentationInterceptor.get_instance()
-        elif kind == "instrumentation":
-            from flowcept.flowceptor.adapters.instrumentation_interceptor import InstrumentationInterceptor
-
-            return InstrumentationInterceptor.get_instance()
-        else:
-            raise NotImplementedError
+    KINDS_TO_NOT_EXPLICITLY_CONTROL = {"dask"}
 
     def __init__(self, plugin_key=None, kind=None):
         self.logger = FlowceptLogger()
@@ -69,7 +40,6 @@ class BaseInterceptor(object):
             self.settings = None
         self._mq_dao = MQDao.build(adapter_settings=self.settings)
         self._bundle_exec_id = None
-        self.started = False
         self._interceptor_instance_id = str(id(self))
         self.telemetry_capture = TelemetryCapture()
         self._saved_workflows = set()
@@ -82,16 +52,13 @@ class BaseInterceptor(object):
 
     def start(self, bundle_exec_id) -> "BaseInterceptor":
         """Start an interceptor."""
-        if not self.started:
-            self._bundle_exec_id = bundle_exec_id
-            self._mq_dao.init_buffer(self._interceptor_instance_id, bundle_exec_id)
-            self.started = True
+        self._bundle_exec_id = bundle_exec_id
+        self._mq_dao.init_buffer(self._interceptor_instance_id, bundle_exec_id)
         return self
 
-    def stop(self):
+    def stop(self) -> bool:
         """Stop an interceptor."""
         self._mq_dao.stop(self._interceptor_instance_id, self._bundle_exec_id)
-        self.started = False
 
     def observe(self, *args, **kwargs):
         """Observe data.
@@ -118,7 +85,7 @@ class BaseInterceptor(object):
         if wf_id in self._saved_workflows:
             return
         self._saved_workflows.add(wf_id)
-        if not self._mq_dao.started:
+        if self._mq_dao.buffer is None:
             # TODO :base-interceptor-refactor: :code-reorg: :usability:
             raise Exception(f"This interceptor {id(self)} has never been started!")
         workflow_obj.interceptor_ids = [self._interceptor_instance_id]
